@@ -14,3 +14,22 @@ import torch.nn.functional as F
 # ---------------------------------------------------------------------------
 # RMSNorm
 # ---------------------------------------------------------------------------
+class RMSNorm(nn.Module):
+    """
+    RMSNorm(x) = x / sqrt(mean(x^2) + eps) * weight
+
+    Unlike LayerNorm, there is no mean-subtraction / bias term -- only
+    rescaling by the root-mean-square. Cheaper and works just as well.
+    """
+    def __init__(self, dim: int, eps: float = 1e-6):
+        super().__init__()
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(dim))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # compute in fp32 for stability, then cast back
+        dtype = x.dtype
+        x = x.float()
+        norm = x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
+        return (norm.to(dtype)) * self.weight
+
