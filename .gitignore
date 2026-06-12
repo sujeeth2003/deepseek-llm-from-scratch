@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+node_modules/
+.env
+.env.*
+!.env.example
+*.pem
+*accessKeys*.csv
+*credentials*.json
+.ipynb_checkpoints/
+.pytest_cache/
+.vscode/
+.idea/
+.DS_Store
+*.log
