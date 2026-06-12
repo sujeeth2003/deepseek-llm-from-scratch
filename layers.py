@@ -114,3 +114,14 @@ class GroupedQueryAttention(nn.Module):
         k = self.wk(x).view(b, s, self.n_kv_heads, self.head_dim).transpose(1, 2)
         v = self.wv(x).view(b, s, self.n_kv_heads, self.head_dim).transpose(1, 2)
 
+        q = apply_rope(q, self.rope_cache.to(x.device))
+        k = apply_rope(k, self.rope_cache.to(x.device))
+
+        # expand kv heads to match query heads (grouped sharing)
+        if self.n_rep > 1:
+            k = k.repeat_interleave(self.n_rep, dim=1)
+            v = v.repeat_interleave(self.n_rep, dim=1)
+
+        out = F.scaled_dot_product_attention(q, k, v, is_causal=True)
+        out = out.transpose(1, 2).contiguous().view(b, s, -1)
+        return self.wo(out)
