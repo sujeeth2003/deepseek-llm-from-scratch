@@ -20,3 +20,13 @@ Key equations:
 import math
 
 
+def non_embedding_flops_per_token(n_layer: int, d_model: int, seq_len: int) -> float:
+    """M in the paper -- Eq. (2), third line."""
+    return 72 * n_layer * d_model ** 2 + 12 * n_layer * d_model * seq_len
+
+
+def six_n1(n_layer: int, d_model: int) -> float:
+    """Non-embedding-parameter approximation used by Kaplan et al. (2020)."""
+    return 72 * n_layer * d_model ** 2
+
+
