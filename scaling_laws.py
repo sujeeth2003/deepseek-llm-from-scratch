@@ -12,3 +12,11 @@ Key equations:
         eta_opt (learning rate) = 0.3118 * C^-0.1250
         B_opt   (batch size)    = 0.2920 * C^0.3271
 
+  3. Optimal model/data allocation (eq. 4), fit via IsoFLOP profiling
+     (Chinchilla-style, but using M instead of N):
+        M_opt = 0.1715 * C^0.5243
+        D_opt = 5.8316 * C^0.4757
+"""
+import math
+
+
