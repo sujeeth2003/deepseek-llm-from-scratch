@@ -33,3 +33,17 @@ class RMSNorm(nn.Module):
         norm = x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
         return (norm.to(dtype)) * self.weight
 
+
+# ---------------------------------------------------------------------------
+# Rotary Positional Embeddings (RoPE)
+# ---------------------------------------------------------------------------
+def precompute_rope_freqs(head_dim: int, max_seq_len: int, base: float = 10000.0):
+    """
+    theta_i = base ^ (-2i/d), i = 0 .. d/2-1
+    Returns complex-exponential table of shape (max_seq_len, head_dim/2)
+    """
+    inv_freq = 1.0 / (base ** (torch.arange(0, head_dim, 2).float() / head_dim))
+    t = torch.arange(max_seq_len).float()
+    freqs = torch.outer(t, inv_freq)              # (seq_len, head_dim/2)
+    return torch.polar(torch.ones_like(freqs), freqs)  # complex64, e^{i*theta}
+
