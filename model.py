@@ -66,3 +66,17 @@ class DeepSeekLLM(nn.Module):
 
         self.apply(self._init_weights)
 
+    def _init_weights(self, module):
+        # paper Sec 2.3: init std = 0.006
+        if isinstance(module, nn.Linear):
+            nn.init.normal_(module.weight, mean=0.0, std=0.006)
+        elif isinstance(module, nn.Embedding):
+            nn.init.normal_(module.weight, mean=0.0, std=0.006)
+
+    def forward(self, input_ids: torch.Tensor, targets: torch.Tensor = None):
+        x = self.tok_emb(input_ids)
+        for layer in self.layers:
+            x = layer(x)
+        x = self.final_norm(x)
+        logits = self.lm_head(x)
+
