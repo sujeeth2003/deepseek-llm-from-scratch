@@ -30,3 +30,15 @@ def six_n1(n_layer: int, d_model: int) -> float:
     return 72 * n_layer * d_model ** 2
 
 
+def six_n2(n_layer: int, d_model: int, n_vocab: int) -> float:
+    """Complete-parameter approximation used by Hoffmann et al. (2022) / Chinchilla."""
+    return 72 * n_layer * d_model ** 2 + 6 * n_vocab * d_model
+
+
+def optimal_hyperparams(compute_budget: float):
+    """Eq. (1): near-optimal batch size (in tokens) and learning rate for a given C."""
+    eta_opt = 0.3118 * compute_budget ** (-0.1250)
+    b_opt = 0.2920 * compute_budget ** 0.3271
+    return {"learning_rate": eta_opt, "batch_size_tokens": b_opt}
+
+
