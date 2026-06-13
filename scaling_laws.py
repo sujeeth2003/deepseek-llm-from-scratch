@@ -42,3 +42,10 @@ def optimal_hyperparams(compute_budget: float):
     return {"learning_rate": eta_opt, "batch_size_tokens": b_opt}
 
 
+def optimal_model_data_allocation(compute_budget: float):
+    """Eq. (4): given compute budget C = M*D, what's the optimal split?"""
+    m_opt = 0.1715 * compute_budget ** 0.5243
+    d_opt = 5.8316 * compute_budget ** 0.4757
+    return {"M_opt_flops_per_token": m_opt, "D_opt_tokens": d_opt}
+
+
