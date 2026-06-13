@@ -38,3 +38,17 @@ class ModelConfig:
                     n_heads=4, n_kv_heads=2, max_seq_len=256)
 
 
+class TransformerBlock(nn.Module):
+    def __init__(self, cfg: ModelConfig):
+        super().__init__()
+        self.attn_norm = RMSNorm(cfg.d_model, cfg.norm_eps)
+        self.attn = GroupedQueryAttention(cfg.d_model, cfg.n_heads, cfg.n_kv_heads, cfg.max_seq_len)
+        self.ffn_norm = RMSNorm(cfg.d_model, cfg.norm_eps)
+        self.ffn = SwiGLU(cfg.d_model)
+
+    def forward(self, x):
+        x = x + self.attn(self.attn_norm(x))   # pre-norm residual attention
+        x = x + self.ffn(self.ffn_norm(x))     # pre-norm residual FFN
+        return x
+
+
