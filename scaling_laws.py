@@ -72,3 +72,19 @@ if __name__ == "__main__":
         print(f"{n_layer:>8} {d_model:>8} {N1:>12.3e} {N2:>12.3e} {M:>12.3e} "
               f"{N1/M:>8.2f} {N2/M:>8.2f}")
 
+    print()
+    print("=" * 70)
+    print("Predicting hyperparameters + optimal allocation for DeepSeek 7B/67B")
+    print("=" * 70)
+    # From the paper: 7B and 67B were trained on 2T tokens.
+    # We can invert D_opt(C) to estimate what compute budget C the paper
+    # effectively "designed for" at 2T tokens, or just show the formulas
+    # applied at illustrative compute budgets (as in Figure 3/4/5).
+    for C in [1e17, 1e20, 1e23, 4.5e23]:
+        hp = optimal_hyperparams(C)
+        alloc = optimal_model_data_allocation(C)
+        print(f"\nC = {C:.1e}")
+        print(f"  optimal LR         = {hp['learning_rate']:.6f}")
+        print(f"  optimal batch size  = {hp['batch_size_tokens']:.3e} tokens")
+        print(f"  optimal M           = {alloc['M_opt_flops_per_token']:.3e} FLOPs/token")
+        print(f"  optimal D           = {alloc['D_opt_tokens']:.3e} tokens")
