@@ -41,3 +41,30 @@ class TrainConfig:
     ckpt_every: int = 200
     ckpt_dir: str = "checkpoints"
 
+
+class MultiStepLRScheduler:
+    """
+    Implements the exact 3-stage schedule described in Sec 2.3, driven by
+    *tokens processed* (not just step count), matching the paper's framing.
+    """
+    def __init__(self, cfg: TrainConfig, tokens_per_step: int):
+        self.cfg = cfg
+        self.tokens_per_step = tokens_per_step
+        self.total_steps = max(1, cfg.total_tokens // tokens_per_step)
+        self.stage1_step = int(self.total_steps * cfg.stage1_frac)
+        self.stage2_step = int(self.total_steps * cfg.stage2_frac)
+
+    def lr_at_step(self, step: int) -> float:
+        cfg = self.cfg
+        # 1) linear warmup
+        if step < cfg.warmup_steps:
+            return cfg.max_lr * (step + 1) / cfg.warmup_steps
+        # 2) full LR plateau (0% - 80% of tokens)
+        if step < self.stage1_step:
+            return cfg.max_lr
+        # 3) decay to 31.6% (80% - 90% of tokens)
+        if step < self.stage2_step:
+            return cfg.max_lr * cfg.stage2_lr_mult
+        # 4) decay to 10% (90% - 100% of tokens)
+        return cfg.max_lr * cfg.stage3_lr_mult
+
