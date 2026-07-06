@@ -68,3 +68,15 @@ class MultiStepLRScheduler:
         # 4) decay to 10% (90% - 100% of tokens)
         return cfg.max_lr * cfg.stage3_lr_mult
 
+
+def build_optimizer(model: torch.nn.Module, cfg: TrainConfig):
+    """AdamW with the paper's beta/weight-decay settings (Sec 2.3)."""
+    decay_params = [p for n, p in model.named_parameters() if p.dim() >= 2]
+    nodecay_params = [p for n, p in model.named_parameters() if p.dim() < 2]
+    groups = [
+        {"params": decay_params, "weight_decay": cfg.weight_decay},
+        {"params": nodecay_params, "weight_decay": 0.0},
+    ]
+    return torch.optim.AdamW(groups, lr=cfg.max_lr, betas=cfg.betas)
+
+
