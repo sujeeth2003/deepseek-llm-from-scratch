@@ -19,3 +19,25 @@ import torch
 import torch.nn.functional as F
 from dataclasses import dataclass
 
+from model import DeepSeekLLM, ModelConfig
+from scaling_laws import optimal_hyperparams, optimal_model_data_allocation, compute_budget_from_model_data
+
+
+@dataclass
+class TrainConfig:
+    total_tokens: int          # D: total training tokens (target)
+    seq_len: int
+    micro_batch_size: int      # sequences per forward/backward pass
+    max_lr: float
+    warmup_steps: int = 2000
+    stage1_frac: float = 0.80  # full LR until 80% of tokens
+    stage2_frac: float = 0.90  # decay to 31.6% until 90% of tokens
+    stage2_lr_mult: float = 0.316
+    stage3_lr_mult: float = 0.10
+    weight_decay: float = 0.1
+    betas: tuple = (0.9, 0.95)
+    grad_clip: float = 1.0
+    log_every: int = 20
+    ckpt_every: int = 200
+    ckpt_dir: str = "checkpoints"
+
