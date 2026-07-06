@@ -80,3 +80,11 @@ def build_optimizer(model: torch.nn.Module, cfg: TrainConfig):
     return torch.optim.AdamW(groups, lr=cfg.max_lr, betas=cfg.betas)
 
 
+def get_batch(data: torch.Tensor, batch_size: int, seq_len: int, device: str):
+    """Sample random contiguous chunks from a 1-D token tensor for next-token prediction."""
+    ix = torch.randint(0, len(data) - seq_len - 1, (batch_size,))
+    x = torch.stack([data[i:i + seq_len] for i in ix])
+    y = torch.stack([data[i + 1:i + seq_len + 1] for i in ix])
+    return x.to(device), y.to(device)
+
+
