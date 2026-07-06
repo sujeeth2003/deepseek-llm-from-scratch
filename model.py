@@ -80,3 +80,15 @@ class DeepSeekLLM(nn.Module):
         x = self.final_norm(x)
         logits = self.lm_head(x)
 
+        loss = None
+        if targets is not None:
+            loss = torch.nn.functional.cross_entropy(
+                logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
+            )
+        return logits, loss
+
+    def num_params(self, non_embedding=True):
+        n = sum(p.numel() for p in self.parameters())
+        if non_embedding:
+            n -= self.tok_emb.weight.numel()
+        return n
