@@ -21,3 +21,17 @@ import torch
 import torch.nn.functional as F
 
 
+def sft_loss(logits: torch.Tensor, targets: torch.Tensor, response_mask: torch.Tensor):
+    """
+    logits: (B, T, V), targets: (B, T), response_mask: (B, T) with 1s where
+    the token belongs to the model's response (loss computed there) and 0s
+    over the prompt (loss ignored there).
+    """
+    logp = F.log_softmax(logits, dim=-1)
+    token_logp = torch.gather(logp, 2, targets.unsqueeze(-1)).squeeze(-1)  # (B, T)
+    masked = token_logp * response_mask
+    # average over response tokens only
+    loss = -(masked.sum(dim=1) / response_mask.sum(dim=1).clamp(min=1)).mean()
+    return loss
+
+
