@@ -42,3 +42,19 @@ def sequence_logprob(logits: torch.Tensor, targets: torch.Tensor, mask: torch.Te
     return (token_logp * mask).sum(dim=1)
 
 
+def dpo_loss(
+    policy_chosen_logits, policy_rejected_logits,
+    ref_chosen_logits, ref_rejected_logits,
+    chosen_targets, rejected_targets,
+    chosen_mask, rejected_mask,
+    beta: float = 0.1,
+):
+    """
+    Direct Preference Optimization loss (Rafailov et al., 2023), as used in
+    Section 4 of the DeepSeek LLM paper to align helpfulness/harmlessness.
+    """
+    pi_chosen = sequence_logprob(policy_chosen_logits, chosen_targets, chosen_mask)
+    pi_rejected = sequence_logprob(policy_rejected_logits, rejected_targets, rejected_mask)
+    ref_chosen = sequence_logprob(ref_chosen_logits, chosen_targets, chosen_mask)
+    ref_rejected = sequence_logprob(ref_rejected_logits, rejected_targets, rejected_mask)
+
