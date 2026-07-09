@@ -35,3 +35,10 @@ def sft_loss(logits: torch.Tensor, targets: torch.Tensor, response_mask: torch.T
     return loss
 
 
+def sequence_logprob(logits: torch.Tensor, targets: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    """Sum of log p(token) over the masked (response) span, per sequence. Shape: (B,)"""
+    logp = F.log_softmax(logits, dim=-1)
+    token_logp = torch.gather(logp, 2, targets.unsqueeze(-1)).squeeze(-1)
+    return (token_logp * mask).sum(dim=1)
+
+
