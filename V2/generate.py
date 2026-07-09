@@ -31,3 +31,15 @@ def generate(model, stoi, itos, prompt: str, length: int, temperature: float,
             logits, _ = model(x_cond)
             logits = logits[:, -1, :] / max(temperature, 1e-5)
 
+            if top_k is not None:
+                v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
+                logits[logits < v[:, [-1]]] = -float("inf")
+
+            probs = F.softmax(logits, dim=-1)
+            next_id = torch.multinomial(probs, num_samples=1)
+            x = torch.cat([x, next_id], dim=1)
+
+    out_ids = x[0].tolist()
+    return "".join(itos[i] for i in out_ids)
+
+
