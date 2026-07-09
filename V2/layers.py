@@ -86,3 +86,17 @@ class SwiGLU(nn.Module):
 # ---------------------------------------------------------------------------
 # Grouped-Query Attention (with RoPE)
 # ---------------------------------------------------------------------------
+class GroupedQueryAttention(nn.Module):
+    """
+    n_kv_heads < n_heads groups multiple query heads to share one K/V head,
+    cutting KV-cache size at inference time. Setting n_kv_heads == n_heads
+    recovers standard Multi-Head Attention (used for the 7B model, Table 2).
+    """
+    def __init__(self, d_model: int, n_heads: int, n_kv_heads: int, max_seq_len: int):
+        super().__init__()
+        assert n_heads % n_kv_heads == 0
+        self.n_heads = n_heads
+        self.n_kv_heads = n_kv_heads
+        self.n_rep = n_heads // n_kv_heads
+        self.head_dim = d_model // n_heads
+
