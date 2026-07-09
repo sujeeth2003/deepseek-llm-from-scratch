@@ -106,3 +106,21 @@ def train(model: DeepSeekLLM, train_cfg: TrainConfig, data: torch.Tensor, device
         for g in optimizer.param_groups:
             g["lr"] = lr
 
+        x, y = get_batch(data, train_cfg.micro_batch_size, train_cfg.seq_len, device)
+        logits, loss = model(x, y)
+
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), train_cfg.grad_clip)
+        optimizer.step()
+
+        if step % train_cfg.log_every == 0:
+            dt = time.time() - t0
+            print(f"step {step:5d} | lr {lr:.6f} | loss {loss.item():.4f} | {dt:.1f}s")
+
+        if step > 0 and step % train_cfg.ckpt_every == 0:
+            ckpt_path = os.path.join(train_cfg.ckpt_dir, f"step_{step}.pt")
+            torch.save({"model": model.state_dict(), "step": step}, ckpt_path)
+            print(f"  -> saved checkpoint to {ckpt_path}")
+
+    return model
