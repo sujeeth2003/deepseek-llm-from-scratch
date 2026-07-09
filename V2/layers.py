@@ -79,3 +79,10 @@ class SwiGLU(nn.Module):
         self.w3 = nn.Linear(d_model, hidden, bias=False)   # up
         self.w2 = nn.Linear(hidden, d_model, bias=False)   # down
 
+    def forward(self, x):
+        return self.w2(F.silu(self.w1(x)) * self.w3(x))
+
+
+# ---------------------------------------------------------------------------
+# Grouped-Query Attention (with RoPE)
+# ---------------------------------------------------------------------------
