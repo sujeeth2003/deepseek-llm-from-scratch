@@ -12,3 +12,22 @@ import argparse
 import torch
 import torch.nn.functional as F
 
+from model import DeepSeekLLM
+
+
+def generate(model, stoi, itos, prompt: str, length: int, temperature: float,
+             top_k: int, max_seq_len: int, device: str):
+    model.eval()
+
+    # encode prompt -> list of token ids (unknown chars are skipped)
+    ids = [stoi[c] for c in prompt if c in stoi]
+    if len(ids) == 0:
+        raise ValueError("None of the characters in --prompt were seen during training.")
+    x = torch.tensor([ids], dtype=torch.long, device=device)
+
+    with torch.no_grad():
+        for _ in range(length):
+            x_cond = x[:, -max_seq_len:]  # truncate to model's context window
+            logits, _ = model(x_cond)
+            logits = logits[:, -1, :] / max(temperature, 1e-5)
+
