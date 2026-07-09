@@ -13,3 +13,11 @@ DPO: given a preference pair (chosen, rejected) for the same prompt, and
                   - (logpi(rejected) - logpi_ref(rejected))
                 ] )
 
+     This directly increases the model's relative preference for the
+     chosen response over the rejected one, without needing an explicit
+     reward model (hence "direct" preference optimization).
+"""
+import torch
+import torch.nn.functional as F
+
+
