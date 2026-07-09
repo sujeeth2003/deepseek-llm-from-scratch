@@ -58,3 +58,16 @@ def main():
     cfg = ckpt["config"]
     stoi, itos = ckpt["stoi"], ckpt["itos"]
 
+    model = DeepSeekLLM(cfg).to(device)
+    model.load_state_dict(ckpt["model_state"])
+
+    text = generate(
+        model, stoi, itos, args.prompt,
+        length=args.length, temperature=args.temperature, top_k=args.top_k,
+        max_seq_len=cfg.max_seq_len, device=device,
+    )
+    print(text)
+
+
+if __name__ == "__main__":
+    main()
