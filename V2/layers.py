@@ -47,3 +47,17 @@ def precompute_rope_freqs(head_dim: int, max_seq_len: int, base: float = 10000.0
     freqs = torch.outer(t, inv_freq)              # (seq_len, head_dim/2)
     return torch.polar(torch.ones_like(freqs), freqs)  # complex64, e^{i*theta}
 
+
+def apply_rope(x: torch.Tensor, rope_cache: torch.Tensor) -> torch.Tensor:
+    """
+    x: (batch, n_heads, seq_len, head_dim)
+    Rotate pairs of dims (x1, x2) -> (x1*cos - x2*sin, x1*sin + x2*cos)
+    by viewing them as complex numbers and multiplying by e^{i*theta}.
+    """
+    b, h, s, d = x.shape
+    x_complex = torch.view_as_complex(x.float().reshape(b, h, s, d // 2, 2))
+    rope = rope_cache[:s].view(1, 1, s, d // 2)
+    x_rotated = x_complex * rope
+    x_out = torch.view_as_real(x_rotated).reshape(b, h, s, d)
+    return x_out.type_as(x)
+
