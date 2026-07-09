@@ -58,3 +58,17 @@ def dpo_loss(
     ref_chosen = sequence_logprob(ref_chosen_logits, chosen_targets, chosen_mask)
     ref_rejected = sequence_logprob(ref_rejected_logits, rejected_targets, rejected_mask)
 
+    pi_logratios = pi_chosen - pi_rejected
+    ref_logratios = ref_chosen - ref_rejected
+
+    logits = beta * (pi_logratios - ref_logratios)
+    loss = -F.logsigmoid(logits).mean()
+
+    # useful metrics to log during training
+    chosen_rewards = beta * (pi_chosen - ref_chosen).detach()
+    rejected_rewards = beta * (pi_rejected - ref_rejected).detach()
+    accuracy = (chosen_rewards > rejected_rewards).float().mean()
+
+    return loss, {"accuracy": accuracy.item(),
+                  "chosen_reward": chosen_rewards.mean().item(),
+                  "rejected_reward": rejected_rewards.mean().item()}
