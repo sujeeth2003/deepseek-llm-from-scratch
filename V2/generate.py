@@ -43,3 +43,18 @@ def generate(model, stoi, itos, prompt: str, length: int, temperature: float,
     return "".join(itos[i] for i in out_ids)
 
 
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--checkpoint", type=str, default="checkpoint.pt")
+    ap.add_argument("--prompt", type=str, required=True)
+    ap.add_argument("--length", type=int, default=200, help="number of new characters to generate")
+    ap.add_argument("--temperature", type=float, default=0.8)
+    ap.add_argument("--top_k", type=int, default=40)
+    args = ap.parse_args()
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
+    cfg = ckpt["config"]
+    stoi, itos = ckpt["stoi"], ckpt["itos"]
+
