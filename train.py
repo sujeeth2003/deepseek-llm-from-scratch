@@ -88,3 +88,21 @@ def get_batch(data: torch.Tensor, batch_size: int, seq_len: int, device: str):
     return x.to(device), y.to(device)
 
 
+def train(model: DeepSeekLLM, train_cfg: TrainConfig, data: torch.Tensor, device: str = "cpu"):
+    os.makedirs(train_cfg.ckpt_dir, exist_ok=True)
+    model.to(device)
+    optimizer = build_optimizer(model, train_cfg)
+
+    tokens_per_step = train_cfg.micro_batch_size * train_cfg.seq_len
+    scheduler = MultiStepLRScheduler(train_cfg, tokens_per_step)
+
+    print(f"Total steps planned: {scheduler.total_steps} "
+          f"(stage1 ends @ {scheduler.stage1_step}, stage2 ends @ {scheduler.stage2_step})")
+
+    model.train()
+    t0 = time.time()
+    for step in range(scheduler.total_steps):
+        lr = scheduler.lr_at_step(step)
+        for g in optimizer.param_groups:
+            g["lr"] = lr
+
