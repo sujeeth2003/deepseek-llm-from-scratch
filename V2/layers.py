@@ -61,3 +61,21 @@ def apply_rope(x: torch.Tensor, rope_cache: torch.Tensor) -> torch.Tensor:
     x_out = torch.view_as_real(x_rotated).reshape(b, h, s, d)
     return x_out.type_as(x)
 
+
+# ---------------------------------------------------------------------------
+# SwiGLU Feed-Forward Network
+# ---------------------------------------------------------------------------
+class SwiGLU(nn.Module):
+    """
+    FFN(x) = W2( SiLU(W1 x) * W3 x )
+    Intermediate dim is 8/3 * d_model per the paper (Sec 2.2), rounded to a
+    multiple of 128 for hardware efficiency.
+    """
+    def __init__(self, d_model: int, multiple_of: int = 128):
+        super().__init__()
+        hidden = int(8 * d_model / 3)
+        hidden = multiple_of * ((hidden + multiple_of - 1) // multiple_of)
+        self.w1 = nn.Linear(d_model, hidden, bias=False)   # gate
+        self.w3 = nn.Linear(d_model, hidden, bias=False)   # up
+        self.w2 = nn.Linear(hidden, d_model, bias=False)   # down
+
