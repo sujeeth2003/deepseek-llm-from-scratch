@@ -100,3 +100,17 @@ class GroupedQueryAttention(nn.Module):
         self.n_rep = n_heads // n_kv_heads
         self.head_dim = d_model // n_heads
 
+        self.wq = nn.Linear(d_model, n_heads * self.head_dim, bias=False)
+        self.wk = nn.Linear(d_model, n_kv_heads * self.head_dim, bias=False)
+        self.wv = nn.Linear(d_model, n_kv_heads * self.head_dim, bias=False)
+        self.wo = nn.Linear(n_heads * self.head_dim, d_model, bias=False)
+
+        rope_cache = precompute_rope_freqs(self.head_dim, max_seq_len)
+        self.register_buffer("rope_cache", rope_cache, persistent=False)
+
+    def forward(self, x: torch.Tensor, mask: torch.Tensor = None):
+        b, s, _ = x.shape
+        q = self.wq(x).view(b, s, self.n_heads, self.head_dim).transpose(1, 2)
+        k = self.wk(x).view(b, s, self.n_kv_heads, self.head_dim).transpose(1, 2)
+        v = self.wv(x).view(b, s, self.n_kv_heads, self.head_dim).transpose(1, 2)
+
