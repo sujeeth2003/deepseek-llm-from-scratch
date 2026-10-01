@@ -15,3 +15,11 @@ What it does:
 import argparse
 import torch
 
+from model import DeepSeekLLM, ModelConfig
+
+
+def load_text(path: str) -> str:
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
