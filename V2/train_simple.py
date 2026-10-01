@@ -23,3 +23,10 @@ def load_text(path: str) -> str:
         return f.read()
 
 
+def build_vocab(text: str):
+    chars = sorted(list(set(text)))
+    stoi = {c: i for i, c in enumerate(chars)}
+    itos = {i: c for i, c in enumerate(chars)}
+    return stoi, itos
+
+
