@@ -26,3 +26,15 @@ class ModelConfig:
         # Table 2: 7B -> 30 layers, d_model=4096, 32 heads, 32 kv_heads (MHA)
         return cls(d_model=4096, n_layers=30, n_heads=32, n_kv_heads=32)
 
+    @classmethod
+    def deepseek_67b(cls):
+        # Table 2: 67B -> 95 layers, d_model=8192, 64 heads, 8 kv_heads (GQA)
+        return cls(d_model=8192, n_layers=95, n_heads=64, n_kv_heads=8)
+
+    @classmethod
+    def tiny(cls, vocab_size=256):
+        # a tiny config for local testing / demo training on CPU
+        return cls(vocab_size=vocab_size, d_model=128, n_layers=4,
+                    n_heads=4, n_kv_heads=2, max_seq_len=256)
+
+
