@@ -85,3 +85,14 @@ def main():
         if step % 100 == 0 or step == args.steps - 1:
             print(f"step {step:5d}/{args.steps} | loss {loss.item():.4f}")
 
+    torch.save({
+        "model_state": model.state_dict(),
+        "config": cfg,
+        "stoi": stoi,
+        "itos": itos,
+    }, args.out)
+    print(f"Saved checkpoint to {args.out}")
+
+
+if __name__ == "__main__":
+    main()
