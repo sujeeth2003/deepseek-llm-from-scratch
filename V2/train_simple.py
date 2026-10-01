@@ -37,3 +37,19 @@ def get_batch(data: torch.Tensor, batch_size: int, seq_len: int, device: str):
     return x.to(device), y.to(device)
 
 
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("textfile", help="path to a plain .txt file to train on")
+    ap.add_argument("--steps", type=int, default=2000)
+    ap.add_argument("--seq_len", type=int, default=128)
+    ap.add_argument("--batch_size", type=int, default=16)
+    ap.add_argument("--lr", type=float, default=3e-4)
+    ap.add_argument("--d_model", type=int, default=256)
+    ap.add_argument("--n_layers", type=int, default=6)
+    ap.add_argument("--n_heads", type=int, default=8)
+    ap.add_argument("--out", type=str, default="checkpoint.pt")
+    args = ap.parse_args()
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Using device: {device}")
+
