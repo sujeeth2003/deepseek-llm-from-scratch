@@ -52,3 +52,17 @@ class TransformerBlock(nn.Module):
         return x
 
 
+class DeepSeekLLM(nn.Module):
+    def __init__(self, cfg: ModelConfig):
+        super().__init__()
+        self.cfg = cfg
+        self.tok_emb = nn.Embedding(cfg.vocab_size, cfg.d_model)
+        self.layers = nn.ModuleList([TransformerBlock(cfg) for _ in range(cfg.n_layers)])
+        self.final_norm = RMSNorm(cfg.d_model, cfg.norm_eps)
+        self.lm_head = nn.Linear(cfg.d_model, cfg.vocab_size, bias=False)
+
+        # weight tying (common practice, saves params)
+        self.lm_head.weight = self.tok_emb.weight
+
+        self.apply(self._init_weights)
+
