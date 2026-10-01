@@ -34,3 +34,18 @@ this class of model. Pre-Norm placement (`x = x + Attn(Norm(x))`) is used,
 not Post-Norm — this is what makes very deep networks (95 layers for the
 67B model) stable to train.
 
+### Rotary Position Embeddings (RoPE)
+Rather than adding a learned/sinusoidal position vector, RoPE **rotates**
+each pair of dimensions in Q and K by an angle proportional to position:
+
+```
+theta_i = base^(-2i/d),   i = 0 .. d/2-1
+(x1, x2) -> (x1*cos(m*theta) - x2*sin(m*theta),  x1*sin(m*theta) + x2*cos(m*theta))
+```
+
+where `m` is the token's position. The dot product `q_m · k_n` after
+rotation depends only on the *relative* position `m - n`, which is exactly
+the property we want for a language model. Implemented efficiently in
+`layers.py` by treating each (x1, x2) pair as a complex number and
+multiplying by `e^{i*m*theta}`.
+
