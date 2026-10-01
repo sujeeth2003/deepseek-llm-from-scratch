@@ -18,3 +18,19 @@ deepseek_llm_scratch/
 └── README.md
 ```
 
+---
+
+## 1. Architecture (Section 2.2)
+
+### RMSNorm
+Instead of LayerNorm's `(x - mean) / std`, RMSNorm skips mean-centering:
+
+```
+RMSNorm(x) = x / sqrt(mean(x²) + eps) * weight
+```
+
+Cheaper (one reduction instead of two) and empirically works as well in
+this class of model. Pre-Norm placement (`x = x + Attn(Norm(x))`) is used,
+not Post-Norm — this is what makes very deep networks (95 layers for the
+67B model) stable to train.
+
