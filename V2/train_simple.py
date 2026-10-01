@@ -30,3 +30,10 @@ def build_vocab(text: str):
     return stoi, itos
 
 
+def get_batch(data: torch.Tensor, batch_size: int, seq_len: int, device: str):
+    ix = torch.randint(0, len(data) - seq_len - 1, (batch_size,))
+    x = torch.stack([data[i:i + seq_len] for i in ix])
+    y = torch.stack([data[i + 1:i + seq_len + 1] for i in ix])
+    return x.to(device), y.to(device)
+
+
