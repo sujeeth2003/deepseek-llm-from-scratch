@@ -70,3 +70,18 @@ def main():
     model = DeepSeekLLM(cfg).to(device)
     print(f"Model params: {model.num_params():,}")
 
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.95), weight_decay=0.1)
+
+    model.train()
+    for step in range(args.steps):
+        x, y = get_batch(data, args.batch_size, args.seq_len, device)
+        logits, loss = model(x, y)
+
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        optimizer.step()
+
+        if step % 100 == 0 or step == args.steps - 1:
+            print(f"step {step:5d}/{args.steps} | loss {loss.item():.4f}")
+
