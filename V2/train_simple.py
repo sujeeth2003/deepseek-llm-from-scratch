@@ -53,3 +53,20 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
 
+    text = load_text(args.textfile)
+    stoi, itos = build_vocab(text)
+    vocab_size = len(stoi)
+    data = torch.tensor([stoi[c] for c in text], dtype=torch.long)
+    print(f"Loaded {len(text):,} characters, vocab size {vocab_size}")
+
+    cfg = ModelConfig(
+        vocab_size=vocab_size,
+        d_model=args.d_model,
+        n_layers=args.n_layers,
+        n_heads=args.n_heads,
+        n_kv_heads=max(1, args.n_heads // 2),  # GQA: half as many KV heads
+        max_seq_len=args.seq_len,
+    )
+    model = DeepSeekLLM(cfg).to(device)
+    print(f"Model params: {model.num_params():,}")
+
