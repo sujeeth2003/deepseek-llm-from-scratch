@@ -239,3 +239,12 @@ tc = TrainConfig(total_tokens=64*8*300, seq_len=64, micro_batch_size=8, max_lr=3
 train(model, tc, data, device='cpu')
 "
 
+# 5. SFT + DPO loss sanity checks
+python3 -c "
+# see alignment.py test block in the build log — DPO loss should equal ln(2)=0.6931
+# at initialization since policy == reference model.
+"
+```
+
+---
+
