@@ -225,3 +225,17 @@ python3 model.py           # (add a __main__ block, or use the snippet in README
 # 3. Scaling law formulas, reproducing paper's Table 3 and Figure 4
 python3 scaling_laws.py
 
+# 4. Tiny end-to-end training run (CPU, seconds)
+python3 -c "
+import torch
+from model import DeepSeekLLM, ModelConfig
+from train import TrainConfig, train
+text = 'the quick brown fox jumps over the lazy dog. ' * 200
+chars = sorted(set(text)); stoi = {c:i for i,c in enumerate(chars)}
+data = torch.tensor([stoi[c] for c in text])
+cfg = ModelConfig.tiny(vocab_size=len(chars)); cfg.max_seq_len = 64
+model = DeepSeekLLM(cfg)
+tc = TrainConfig(total_tokens=64*8*300, seq_len=64, micro_batch_size=8, max_lr=3e-3, warmup_steps=20, log_every=50)
+train(model, tc, data, device='cpu')
+"
+
