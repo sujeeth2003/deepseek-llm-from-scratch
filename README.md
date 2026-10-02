@@ -181,3 +181,10 @@ warmup (step 0: lr=0.00015) → plateau (steps 50-200: lr=0.003) → decay
 
 ---
 
+## 4. Alignment: SFT + DPO (Section 4)
+
+### SFT
+Ordinary next-token cross-entropy, but masked to the **response** span
+only — the model shouldn't get loss signal for "predicting" the prompt
+tokens verbatim, since it didn't generate them.
+
