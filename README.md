@@ -106,3 +106,18 @@ M = 72 * n_layer * d_model²              (dense FFN + QKVO projections)
   + 12 * n_layer * d_model * seq_len      (attention operation itself)
 ```
 
+so that `C = M * D` is a **more accurate** stand-in for `C = 6ND`,
+especially at small scale where the difference between `6N1`, `6N2`, and
+`M` can be 50%+ (Table 3 — reproduced exactly by `scaling_laws.py`,
+verified output below).
+
+### Fitting hyperparameters to compute budget (Eq. 1)
+Grid-searching batch size and LR at many small compute budgets and keeping
+only near-optimal points (generalization error within 0.25% of the best),
+the paper fits power laws:
+
+```
+eta_opt(C) = 0.3118 * C^-0.1250    (learning rate shrinks as compute grows)
+B_opt(C)   = 0.2920 * C^0.3271     (batch size grows as compute grows)
+```
+
