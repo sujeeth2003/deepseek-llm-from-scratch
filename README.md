@@ -151,3 +151,21 @@ rather than more tokens.** This is likely why earlier scaling-law papers
 (Kaplan et al. vs. Hoffmann et al.) disagreed — they were fit on different
 datasets.
 
+---
+
+## 3. Training Loop (Sections 2.3 - 2.4)
+
+- **Optimizer**: AdamW, β1=0.9, β2=0.95, weight_decay=0.1, grad-clip=1.0.
+- **LR schedule**: NOT cosine. A 3-stage **multi-step** schedule:
+  1. Linear warmup for 2000 steps.
+  2. Hold at max LR until 80% of total training tokens are processed.
+  3. Decay to 31.6% of max LR from 80% → 90% of tokens.
+  4. Decay to 10% of max LR from 90% → 100% of tokens.
+
+  Paper's justification (Fig. 1a/1b): final performance matches cosine
+  decay, but because the "shape" of stage 1 is flat, you can **reuse a
+  checkpoint's optimizer/LR state** to keep training longer (continual
+  training) without needing to have predicted the final token count in
+  advance — cosine decay bakes the total-step count into the schedule
+  itself, multi-step doesn't.
+
