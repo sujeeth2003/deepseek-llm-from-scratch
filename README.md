@@ -58,3 +58,15 @@ learned per-element gate. The hidden dimension is `8/3 * d_model` (not 4x
 like vanilla Transformers) — this keeps parameter count roughly constant
 vs. a non-gated FFN despite having 3 weight matrices instead of 2.
 
+### Grouped-Query Attention (GQA)
+Standard Multi-Head Attention gives every query head its own K/V head.
+GQA shares one K/V head across a *group* of query heads:
+
+```
+n_heads = 64, n_kv_heads = 8  ->  8 query heads share each K/V head
+```
+
+This shrinks the KV-cache at inference time by `n_heads / n_kv_heads`,
+which matters a lot once you're serving a 67B model. The paper uses plain
+MHA for 7B (`n_kv_heads == n_heads`) but GQA for 67B.
+
