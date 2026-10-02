@@ -248,3 +248,23 @@ python3 -c "
 
 ---
 
+## Scaling this up to a real run
+
+To go from this toy code to something like the paper's actual 7B run,
+you'd need to change (roughly in order of importance):
+
+1. **Real data pipeline**: a tokenizer (paper: BBPE, 100K vocab, trained on
+   24GB multilingual corpus) + a deduplicated, filtered, web-scale text
+   corpus (paper: 2T tokens) streamed from disk/network rather than a
+   single in-memory tensor.
+2. **Distributed training**: tensor + pipeline + data parallelism (the
+   paper uses their in-house "HAI-LLM" framework, analogous to Megatron-LM
+   + DeepSpeed ZeRO-1). `model.py`'s per-layer structure is written to be
+   straightforward to shard with FSDP or Megatron-style tensor parallelism.
+3. **FlashAttention**: swap `F.scaled_dot_product_attention` for a
+   FlashAttention-2 kernel if not already dispatched to one automatically.
+4. **Use the scaling law formulas** in `scaling_laws.py` to *pick* your
+   architecture and hyperparameters before spending compute, rather than
+   guessing — that's the whole point of Section 3.
+5. **Checkpointing at scale**: async, sharded checkpoint writes (the paper
+   saves every 5 minutes) rather than the simple `torch.save` used here.
