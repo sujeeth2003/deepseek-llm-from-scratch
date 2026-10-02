@@ -91,3 +91,18 @@ so it doesn't need real memory):
 ```
 matching the paper's naming.
 
+---
+
+## 2. Scaling Laws (Section 3) — the paper's central contribution
+
+### Why not just count parameters?
+The classical formula `C ≈ 6ND` (compute ≈ 6 × parameters × tokens)
+over- or under-estimates cost depending on model shape, because it ignores
+the attention operation's cost and (optionally) the vocabulary projection's
+cost. The paper introduces **non-embedding FLOPs per token, M**:
+
+```
+M = 72 * n_layer * d_model²              (dense FFN + QKVO projections)
+  + 12 * n_layer * d_model * seq_len      (attention operation itself)
+```
+
