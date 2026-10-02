@@ -121,3 +121,18 @@ eta_opt(C) = 0.3118 * C^-0.1250    (learning rate shrinks as compute grows)
 B_opt(C)   = 0.2920 * C^0.3271     (batch size grows as compute grows)
 ```
 
+This means: **don't hand-tune LR/batch size for every model size** — pick
+your compute budget first, and these formulas hand you good starting
+hyperparameters directly.
+
+### Fitting the optimal model/data split (Eq. 4, IsoFLOP method)
+For a fixed compute budget C, there's a tradeoff between training a bigger
+model on fewer tokens vs. a smaller model on more tokens. The paper runs
+~10 model/data allocations at each of 8 compute budgets (1e17 to 3e20),
+and fits:
+
+```
+M_opt(C) = 0.1715 * C^0.5243
+D_opt(C) = 5.8316 * C^0.4757
+```
+
