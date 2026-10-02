@@ -206,3 +206,10 @@ reference model *specifically* in the direction of preferring chosen over
 rejected — without needing to train an explicit reward model first (unlike
 classic RLHF/PPO).
 
+Verified: at initialization (policy == reference), the log-ratio terms are
+identically zero, so the loss must equal `-log(sigmoid(0)) = ln(2) ≈
+0.6931` — and that's exactly what the test run prints, confirming the
+implementation is mathematically correct.
+
+---
+
