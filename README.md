@@ -70,3 +70,24 @@ This shrinks the KV-cache at inference time by `n_heads / n_kv_heads`,
 which matters a lot once you're serving a 67B model. The paper uses plain
 MHA for 7B (`n_kv_heads == n_heads`) but GQA for 67B.
 
+### Macro design: depth over width
+Table 2 in the paper:
+
+| Params | Layers | d_model | Heads | KV Heads |
+|---|---|---|---|---|
+| 7B  | 30 | 4096 | 32 | 32 |
+| 67B | 95 | 8192 | 64 | 8  |
+
+Most GQA papers widen the FFN to compensate for GQA's capacity loss; this
+paper instead **adds layers** (95 vs. the ~80 you'd expect from naive
+scaling) — a deliberate choice, explained as improving performance and
+also easing pipeline-parallel partitioning across many GPUs.
+
+Verified parameter counts (see `model.py`, run with `torch.device('meta')`
+so it doesn't need real memory):
+```
+7B config  -> 6.49B params
+67B config -> 66.29B params
+```
+matching the paper's naming.
+
