@@ -213,3 +213,9 @@ implementation is mathematically correct.
 
 ---
 
+## Verifying it works
+
+```bash
+# 1. Core layers (RMSNorm / RoPE / SwiGLU / GQA) forward pass
+python3 -c "from layers import *"   # imports cleanly
+
