@@ -49,3 +49,12 @@ the property we want for a language model. Implemented efficiently in
 `layers.py` by treating each (x1, x2) pair as a complex number and
 multiplying by `e^{i*m*theta}`.
 
+### SwiGLU Feed-Forward Network
+```
+FFN(x) = W2( SiLU(W1 x) ⊙ W3 x )
+```
+A "gated" FFN: `W3 x` is the normal transformation, `SiLU(W1 x)` acts as a
+learned per-element gate. The hidden dimension is `8/3 * d_model` (not 4x
+like vanilla Transformers) — this keeps parameter count roughly constant
+vs. a non-gated FFN despite having 3 weight matrices instead of 2.
+
