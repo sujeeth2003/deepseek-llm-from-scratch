@@ -136,3 +136,18 @@ M_opt(C) = 0.1715 * C^0.5243
 D_opt(C) = 5.8316 * C^0.4757
 ```
 
+Verified in `scaling_laws.py`: at `C = 4.5e23` (the budget used for the
+67B/2T-token run) this predicts `M_opt ≈ 4.32e11` FLOPs/token and
+`D_opt ≈ 1.04e12` tokens — matching Figure 4's annotated values in the
+paper almost exactly.
+
+### The data-quality finding (Section 3.3, Table 4)
+Fitting the same allocation exponents on three datasets of different
+quality (early in-house < current in-house < OpenWebText2) shows the
+model-scaling exponent `a` **increases** with data quality while the
+data-scaling exponent `b` **decreases**. Practical takeaway: **the better
+your data, the more of your compute budget should go to a bigger model
+rather than more tokens.** This is likely why earlier scaling-law papers
+(Kaplan et al. vs. Hoffmann et al.) disagreed — they were fit on different
+datasets.
+
