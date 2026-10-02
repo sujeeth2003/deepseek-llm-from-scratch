@@ -219,3 +219,9 @@ implementation is mathematically correct.
 # 1. Core layers (RMSNorm / RoPE / SwiGLU / GQA) forward pass
 python3 -c "from layers import *"   # imports cleanly
 
+# 2. Full model forward + backward + param-count sanity check
+python3 model.py           # (add a __main__ block, or use the snippet in README)
+
+# 3. Scaling law formulas, reproducing paper's Table 3 and Figure 4
+python3 scaling_laws.py
+
