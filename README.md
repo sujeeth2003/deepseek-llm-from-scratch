@@ -188,3 +188,21 @@ Ordinary next-token cross-entropy, but masked to the **response** span
 only — the model shouldn't get loss signal for "predicting" the prompt
 tokens verbatim, since it didn't generate them.
 
+### DPO (Direct Preference Optimization)
+Given a prompt with a preferred ("chosen") and dispreferred ("rejected")
+response, and a frozen reference model (typically the post-SFT model
+before DPO training begins):
+
+```
+L_DPO = -log sigmoid( beta * [
+            (logpi(chosen)   - logpi_ref(chosen))
+          - (logpi(rejected) - logpi_ref(rejected))
+        ] )
+```
+
+Intuition: it increases `pi(chosen)/pi_ref(chosen)` relative to
+`pi(rejected)/pi_ref(rejected)`, i.e. it makes the policy diverge from the
+reference model *specifically* in the direction of preferring chosen over
+rejected — without needing to train an explicit reward model first (unlike
+classic RLHF/PPO).
+
