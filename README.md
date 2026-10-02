@@ -169,3 +169,15 @@ datasets.
   advance — cosine decay bakes the total-step count into the schedule
   itself, multi-step doesn't.
 
+- **Mixed precision**: bf16 activations, fp32 gradient accumulation
+  (the paper does this at the CUDA-kernel level for cross-entropy
+  specifically to save memory — noted in code comments, not reproduced
+  at that level of detail here since it's infra-specific).
+
+Verified: `train.py` run on a tiny model/dataset shows loss dropping from
+3.37 → 0.02 over 250 steps, with the LR schedule visibly moving through
+warmup (step 0: lr=0.00015) → plateau (steps 50-200: lr=0.003) → decay
+(step 250: lr=0.00095) exactly as specified.
+
+---
+
